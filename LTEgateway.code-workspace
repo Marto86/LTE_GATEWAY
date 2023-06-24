@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"esp_modem.h": "c",
+			"esp_event.h": "c",
+			"*.inc": "c",
+			"type_traits": "cpp"
+		}
+	}
+}

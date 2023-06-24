@@ -1,0 +1,6 @@
+.vscode/tasks.json
+.vscode/settings.json
+build
+dependencies.lock
+sdkconfig.old
+.vscode/c_cpp_properties.json

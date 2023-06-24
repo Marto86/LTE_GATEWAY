@@ -1,0 +1,10 @@
+key,type,encoding,value
+provisioning,namespace,,
+uuid,data,i32,27488
+serial,data,string,PC-B-22-09-00027488
+mqtt_cl_id,data,string,polyGw0027488
+mqtt_cl_user,data,string,polyGw0027488
+mqtt_pass,data,string,l$..NJ#6zCOOle*AAqU#R9Te.$M
+sector,data,string,188
+wifi_cl_ssid,data,string,test
+wifi_cl_pass,data,string,test

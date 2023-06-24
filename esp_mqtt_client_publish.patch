@@ -1,0 +1,16 @@
+ mqtt_client.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mqtt_client.c b/mqtt_client.c
+index d2c3d45..94ba44e 100644
+--- a/mqtt_client.c
++++ b/mqtt_client.c
+@@ -1780,7 +1780,7 @@ int esp_mqtt_client_publish(esp_mqtt_client_handle_t client, const char *topic,
+         MQTT_API_UNLOCK(client);
+         return -1;
+     }
+-    int ret = 0;
++    int ret = -2;
+ 
+     /* Skip sending if not connected (rely on resending) */
+     if (client->state != MQTT_STATE_CONNECTED) {
