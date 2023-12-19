@@ -1,0 +1,70 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "espidf",
+      "name": "Launch",
+      "request": "launch",
+      "debugPort": 9998,
+      "logLevel": 2,
+      "mode": "auto",
+      "verifyAppBinBeforeDebug": true,
+      "tmoScaleFactor": 1,
+      "initGdbCommands": [
+        "target remote :3333",
+        "symbol-file C:/Work/SW/Ingeli/LTEgateway/build/LTEgateway.elf",
+        "mon reset halt",
+        "set remotetimeout 10000",
+        "flushregs",
+        "thb app_main"
+      ],
+      "env": {
+        "CUSTOM_ENV_VAR": "SOME_VALUE"
+      }
+    },
+
+    {
+      "name": "GDB",
+      "type": "cppdbg",
+      "request": "launch",
+      "MIMode": "gdb",
+      "miDebuggerPath": "${command:espIdf.getXtensaGdb}",
+      "program": "${workspaceFolder}/build/${command:espIdf.getProjectName}.elf",
+      "windows": {
+        "program": "${workspaceFolder}\\build\\${command:espIdf.getProjectName}.elf"
+      },
+      "cwd": "${workspaceFolder}",
+      "environment": [{ "name": "PATH", "value": "${config:idf.customExtraPaths}" }],
+      "setupCommands": [
+        { "text": "target remote :3333" },
+        { "text": "symbol-file C:/Work/SW/Ingeli/LTEgateway/build/LTEgateway.elf" },
+        { "text": "set remote hardware-watchpoint-limit 2"},
+        { "text": "set remotetimeout 10000"},
+        { "text": "mon reset halt" },
+        { "text": "thb app_main" },
+        { "text": "flushregs" }
+      ],
+      "externalConsole": false,
+      "logging": {
+        "engineLogging": true
+      }
+    },
+
+    {
+      "type": "gdb",
+      "request": "launch",
+      "name": "Debug ESP32",
+      "target": "${workspaceFolder}/build/${command:espIdf.getProjectName}.elf",
+      "cwd": "${workspaceFolder}",
+      "gdbpath": "${command:espIdf.getXtensaGdb}", // Path of the toolchain     
+      "autorun": [
+        "target remote :3333", // Connect to OpenOCD
+        "mon reset halt", // Reset the chip and keep the CPUs halted
+        "set remote hardware-watchpoint-limit 2", // Restrict GDB to using two hardware watchpoints supported by ESP32
+        "flushregs", // Force GDB to get new state from the target
+        "thb app_main", // Insert a temporary hardware breakpoint at the main function
+        "c" // Resume the program. It will then stop at breakpoint inserted at app_main
+      ]
+    }
+  ]
+}

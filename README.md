@@ -90,11 +90,7 @@ The Linux method is as follows, other platforms please refer [Set up the environ
     . $HOME/esp/esp-idf/export.sh
     ```
 
-4. Patch the ESP-IDF SDK
-
-Copy the "esp_mqtt_client_publish.patch" file to "esp-idf\components\mqtt\esp-mqtt" folder and apply the patch.
-
-5. Set the IDF build target to `esp32s3`
+4. Set the IDF build target to `esp32s3`
 
     ```bash
     idf.py set-target esp32s2
@@ -102,11 +98,11 @@ Copy the "esp_mqtt_client_publish.patch" file to "esp-idf\components\mqtt\esp-mq
 
 or use the VScode "Set IDF-ESP Target" task or click at the label at the bottom ribbon.
 
-6. Optional: make any project configuration, e.g. select the Cat.1 module model `Menuconfig → Component config → ESP-MODEM → Choose Modem Board`, if the your module is not in the list, please refer to `Other 4G Cat.1 Module Adaptation Methods` to configure.
+5. Optional: make any project configuration, e.g. select the Cat.1 module model `Menuconfig → Component config → ESP-MODEM → Choose Modem Board`, if the your module is not in the list, please refer to `Other 4G Cat.1 Module Adaptation Methods` to configure.
 
     ![choose_modem](./_static/choose_modem.png)
 
-7. Build, download, check log output
+6. Build, download, check log output
 
     ```bash
     idf.py build flash monitor
@@ -121,7 +117,7 @@ I (0) cpu_start: Starting scheduler on APP CPU.
 W (385) main: Force reset 4g board
 I (389) gpio: GPIO[13]| InputEn: 0| OutputEn: 1| OpenDrain: 0| Pullup: 0| Pulldown: 0| Intr:0 
 I (3915) main: ====================================
-I (3915) main:      4G LTE-Modbus Gateway
+I (3915) main:      Ingeli 4G LTE-Modbus Gateway
 I (3915) main: ====================================
 | I (3920) gpio: GPIO[15] | InputEn: 0 | OutputEn: 1 | OpenDrain: 0 | Pullup: 0 | Pulldown: 0 | Intr:0 |
 | I (3929) gpio: GPIO[17] | InputEn: 0 | OutputEn: 1 | OpenDrain: 0 | Pullup: 0 | Pulldown: 0 | Intr:0 |
@@ -281,6 +277,17 @@ Enable the `4G Modem Configuration -> Dump system task status` option in `menuco
 > The actual communication rate is affected by the operator's network, test software, Wi-Fi interference, and the number of terminal connections, etc.
 
 
+**Ingeli provisioning**
+1. Modify nvs_ingeli_provisioning.csv with the parameters for the device on the assembly line
+2. Execute command:
+python3 /home/georgi/esp/esp-idf/components/nvs_flash/nvs_partition_generator/nvs_partition_gen.py generate provisioning.csv provisioning.bin 0x4000
+3. Flash the data to the device with command:
+python3 /home/georgi/esp/esp-idf/components/partition_table/parttool.py --port "/dev/ttyUSB0" write_partition --partition-name=provisioning --input "./provisioning.bin"
+
+
+python3 /home/georgi/esp/esp-idf/components/partition_table/parttool.py --port "/dev/ttyUSB0" read_partition --partition-type=data --partition-subtype=nvs "./nvs_ingeli_provisioning_read_from_flash.bin"
+
+
 **OTA**
 0. We need to discuss the OTA server certificate implementation if OTA server is going to be https
 1. Upload new firmware binary to web server
@@ -289,15 +296,15 @@ Enable the `4G Modem Configuration -> Dump system task status` option in `menuco
 1.Install mosquitto-2.0.14 (If not already done)
 2.Paste certificate in to installation folder (If not already done)
 3.In new terminal subscribe for all topics in mosquitto with command:
-mosquitto_sub -h broker_link.dev --cafile cert.crt  -t "#" -p 28883 -F "@Y-@m-@d @H:@M:@S : %t : %x" --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0
+mosquitto_sub -h mqtts.pool.mytech-connect.dev --cafile ingeliDevCA01.crt  -t "#" -p 28883 -F "@Y-@m-@d @H:@M:@S : %t : %x" --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0
 4.In new terminal execute get firmware version command:
-mosquitto_pub -h broker_link.dev --cafile cert.crt -t "poly/cmd/1/30123/info" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "get_firmware"
+mosquitto_pub -h mqtts.pool.mytech-connect.dev --cafile ingeliDevCA01.crt -t "poly/cmd/1/30123/info" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "get_firmware"
 5.In the terminal with all topics subscription (point 3) must receive message with the firmware version. Example:
 "Firmware version: 0.0.1"
 6.Prepare OTA update binary(new firmware version) and upload to web server
 7.Run OTA update command with mosquitto_pub:
-mosquitto_pub -h broker_link.dev --cafile cert.crt -t "poly/cmd/1/30123/otalink" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "SERVER LINK"
+mosquitto_pub -h mqtts.pool.mytech-connect.dev --cafile ingeliDevCA01.crt -t "poly/cmd/1/30123/otalink" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "http://rnd.bg/ingeli/LTEgateway.bin"
 8.After around 2-3 minutes in new terminal execute get firmware version command:
-mosquitto_pub -h broker_link.dev --cafile cert.crt -t "poly/cmd/1/30123/info" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "get_firmware"
+mosquitto_pub -h mqtts.pool.mytech-connect.dev --cafile ingeliDevCA01.crt -t "poly/cmd/1/30123/info" -p 28883 --insecure -u "wildcard0" -P "39d544f0ac583e1" -i wildcard0 -d -m "get_firmware"
 7.In the terminal with all topics subscription (point 3) must receive message with the new firmware version. Example:
 "Firmware version: 0.0.2"

@@ -1,0 +1,8 @@
+key,type,encoding,value     <-- column header
+namespace_name,namespace,,  <-- First entry should be of type "namespace"
+gateway_uuid,data,i32,43981
+gateway_serial_number,data,string,PC-B-22-05-00043981
+gateway_mqtt_client_id,data,string,wildcard9
+gateway_mqtt_client_user,data,string,wildcard9
+gateway_mqtt_password,data,string,7e0bb4ccf1a68c3
+gateway_sector,data,string,303

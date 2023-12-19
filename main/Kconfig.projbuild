@@ -1,0 +1,245 @@
+menu "4G Modem Configuration"
+
+    menu "gpio config"
+
+        config LED_RED_SYSTEM_GPIO
+            int "System status led (red) gpio, set 0 if not use"
+            default 15
+        config LED_BLUE_WIFI_GPIO
+            int "Wi-Fi status led (blue) gpio, set 0 if not use"
+            default 17
+        config LED_GREEN_4GMODEM_GPIO
+            int "Modem status led (green) gpio, set 0 if not use"
+            default 16
+        config MODEM_POWER_GPIO
+            int "Modem power control gpio, set 0 if not use"
+            default 12
+        config MODEM_RESET_GPIO
+            int "Modem reset control gpio, set 0 if not use"
+            default 13
+    endmenu
+
+    menu "WiFi soft AP"
+
+        config EXAMPLE_WIFI_SSID
+            string "WiFi SSID"
+            default "LTEgateway"
+            help
+                SSID (network name) for the example to connect to.
+
+        config EXAMPLE_WIFI_PASSWORD
+            string "WiFi Password"
+            default "12345678"
+            help
+                WiFi password (WPA or WPA2) for the example to use.
+        config EXAMPLE_WIFI_CHANNEL
+            int "WiFi Channel"
+            range 1 13
+            default 13
+            help
+                WiFi channel (network channel) for the example to use.
+
+        config EXAMPLE_MAX_STA_CONN
+            int "Maximal STA connections"
+            default 5
+            help
+                Max number of the STA connects to AP.
+        config EXAMPLE_MANUAL_DNS
+            bool "config main dns address"
+            default n
+            help
+                Config main dns address manully, using dns address from ppp by default
+        config EXAMPLE_MANUAL_DNS_ADDR
+            string  "main dns address"
+            default "114.114.114.114"
+            depends on EXAMPLE_MANUAL_DNS
+    endmenu
+
+    config MODEM_DIAL_RERTY_TIMES
+        int "Retry times during dial"
+        default 5
+        help 
+            Set retry times waitting for modem link with carrier base station
+
+    config DUMP_SYSTEM_STATUS
+        bool "Dump system task status"
+        default n
+        help
+            Dump system task status, stack left, cpu load, etc.
+
+    config EXAMPLE_MODEM_PPP_APN
+        string "Set Modem APN"
+        default "internet"
+        help
+            Set APN (Access Point Name), a logical name to choose data network
+endmenu
+
+
+menu "Modbus Configuration"
+
+    config MB_UART_PORT_NUM
+        int "UART port number"
+        range 0 2 if IDF_TARGET_ESP32
+        default 2 if IDF_TARGET_ESP32
+        range 0 1 if IDF_TARGET_ESP32S2
+        default 1 if IDF_TARGET_ESP32S2
+        help
+            UART communication port number for Modbus.
+
+    config MB_UART_BAUD_RATE
+        int "UART communication speed"
+        range 1200 115200
+        default 115200
+        help
+            UART communication speed for Modbus.
+
+    config MB_UART_RXD
+        int "UART RXD pin number"
+        range 0 34 if IDF_TARGET_ESP32
+        default 22 if IDF_TARGET_ESP32
+        range 0 46 if IDF_TARGET_ESP32S2
+        default 19 if IDF_TARGET_ESP32S2
+        help
+            GPIO number for UART RX pin. See UART documentation for more information
+            about available pin numbers for UART.
+
+    config MB_UART_TXD
+        int "UART TXD pin number"
+        range 0 34 if IDF_TARGET_ESP32
+        default 23 if IDF_TARGET_ESP32
+        range 0 46 if IDF_TARGET_ESP32S2
+        default 20 if IDF_TARGET_ESP32S2
+        help
+            GPIO number for UART TX pin. See UART documentation for more information
+            about available pin numbers for UART.
+
+    config MB_UART_RTS
+        int "UART RTS pin number"
+        range 0 34 if IDF_TARGET_ESP32
+        range 0 46 if IDF_TARGET_ESP32S2
+        default 18
+        help
+            GPIO number for UART RTS pin. This pin is connected to
+            ~RE/DE pin of RS485 transceiver to switch direction.
+            See UART documentation for more information about available pin
+            numbers for UART.
+
+    choice MB_COMM_MODE
+        prompt "Modbus communication mode"
+        default MB_COMM_MODE_RTU if CONFIG_FMB_COMM_MODE_RTU_EN
+        help
+            Selection of Modbus communication mode option for Modbus.
+
+        config MB_COMM_MODE_RTU
+            bool "RTU mode"
+            depends on FMB_COMM_MODE_RTU_EN
+
+        config MB_COMM_MODE_ASCII
+            bool "ASCII mode"
+            depends on FMB_COMM_MODE_ASCII_EN
+
+    endchoice
+
+endmenu
+
+menu "MQTT Configuration"
+
+    config BROKER_URI
+        string "Broker URL"
+        default "mqtts://mqtt.eclipseprojects.io:8883"
+        help
+            URL of an mqtt broker which this example connects to.
+
+    config BROKER_CERTIFICATE_OVERRIDE
+        string "Broker certificate override"
+        default ""
+        help
+            Please leave empty if broker certificate included from a textfile; otherwise fill in a base64 part of PEM
+            format certificate
+
+    config BROKER_CERTIFICATE_OVERRIDDEN
+        bool
+        default y if BROKER_CERTIFICATE_OVERRIDE != ""
+
+    config BROKER_BIN_SIZE_TO_SEND
+        # This option is not visible and is used only to set parameters for example tests
+        # Here we configure the data size to send and to be expected in the python script
+        int
+        default 20000
+
+endmenu
+
+menu "Ble provisionig Configuration"
+
+    choice EXAMPLE_PROV_TRANSPORT
+        bool "Provisioning Transport"
+        default EXAMPLE_PROV_TRANSPORT_SOFTAP if IDF_TARGET_ESP32S2
+        default EXAMPLE_PROV_TRANSPORT_BLE
+        help
+            Wi-Fi provisioning component offers both, SoftAP and BLE transports. Choose any one.
+
+        config EXAMPLE_PROV_TRANSPORT_BLE
+            bool "BLE"
+            select BT_ENABLED
+            depends on !IDF_TARGET_ESP32S2
+        config EXAMPLE_PROV_TRANSPORT_SOFTAP
+            bool "Soft AP"
+    endchoice
+
+    config EXAMPLE_PROV_TRANSPORT
+        int
+        default 1 if EXAMPLE_PROV_TRANSPORT_BLE
+        default 2 if EXAMPLE_PROV_TRANSPORT_SOFTAP
+
+    config EXAMPLE_RESET_PROVISIONED
+        bool
+        default n
+        prompt "Reset provisioned status of the device"
+        help
+            This erases the NVS to reset provisioned status of the device on every reboot.
+            Provisioned status is determined by the Wi-Fi STA configuration, saved on the NVS.
+
+    config EXAMPLE_RESET_PROV_MGR_ON_FAILURE
+        bool
+        default y
+        prompt "Reset provisioned credentials and state machine after session failure"
+        help
+            Enable reseting provisioned credentials and state machine after session failure.
+            This will restart the provisioning service after retries are exhausted.
+
+    config EXAMPLE_PROV_MGR_MAX_RETRY_CNT
+        int
+        default 5
+        prompt "Max retries before reseting provisioning state machine"
+        depends on EXAMPLE_RESET_PROV_MGR_ON_FAILURE
+        help
+            Set the Maximum retry to avoid reconnecting to an inexistent AP or if credentials
+            are misconfigured. Provisioned credentials are erased and internal state machine
+            is reset after this threshold is reached.
+
+
+    config EXAMPLE_PROV_USING_BLUEDROID
+        bool
+        depends on (BT_BLUEDROID_ENABLED && (IDF_TARGET_ESP32C3 || IDF_TARGET_ESP32S3))
+        select BT_BLE_42_FEATURES_SUPPORTED
+        default y
+        help
+            This enables BLE 4.2 features for Bluedroid.
+endmenu
+menu "wps Configuration"
+
+    choice EXAMPLE_WPS_TYPE
+        prompt "WPS mode"
+        default EXAMPLE_WPS_TYPE_PBC
+        help
+            WPS type for the esp32 to use.
+
+        config EXAMPLE_WPS_TYPE_PBC
+            bool "PBC"
+        config EXAMPLE_WPS_TYPE_PIN
+            bool "PIN"
+        config EXAMPLE_WPS_TYPE_DISABLE
+            bool "disable"
+    endchoice
+
+endmenu

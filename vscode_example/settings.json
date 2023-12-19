@@ -1,0 +1,9 @@
+{
+    "idf.adapterTargetName": "esp32s3",
+    "idf.openOcdConfigs": [
+        "interface/jlink.cfg",
+        "target/esp32s3.cfg"
+    ],
+	"idf.portWin": "COM12",
+	"idf.flashType": "JTAG",
+}
